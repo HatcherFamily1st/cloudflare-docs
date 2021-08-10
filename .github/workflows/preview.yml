@@ -109,6 +109,7 @@ jobs:
           echo preivew $PREVIEW_ACCOUNT_ID
           echo github ${GITHUB_WORKSPACE}
           echo prnumber $PRNUMBER
+          echo environment! $ENVIRONMENT
           export WRANGLER_HOME="$HOME"
           mkdir -p "$HOME/.wrangler"
           chmod -R 770 "$HOME/.wrangler"
@@ -122,8 +123,7 @@ jobs:
                 cp wrangler.toml ${GITHUB_WORKSPACE}/
                 COPIED=true
               fi
-              ${GITHUB_WORKSPACE}/.github/setup_preview.sh ${{ format(github.event.number) }} $tile 09e1897acd19314fc6df7d21108729b0
-              wrangler publish -e $ENVIRONMENT
+              wrangler publish
               popd
             else
               pushd products/$tile
@@ -131,7 +131,12 @@ jobs:
                 cp wrangler.toml ${GITHUB_WORKSPACE}/
                 COPIED=true
               fi
-              ${GITHUB_WORKSPACE}/.github/setup_preview.sh ${{ format(github.event.number) }} $tile 09e1897acd19314fc6df7d21108729b0
+              echo "
+              [env.preview]
+              name = \"pr5-spectrum\"
+              type = \"webpack\"
+              account_id = \"b54f07a6c269ecca2fa60f1ae4920c99\"
+              workers_dev = \"true\" " >> wrangler.toml 
               wrangler publish -e $ENVIRONMENT
               popd
             fi
@@ -141,10 +146,7 @@ jobs:
           echo "SUBDOMAIN=$(wrangler subdomain | iconv -c -f utf-8 -t ascii | xargs)" >> $GITHUB_ENV
         env:
           ENVIRONMENT: preview
-          CF_ACCOUNT_ID: 09e1897acd19314fc6df7d21108729b0
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-
-
 
     
   # create-pr-artifact:
